@@ -52,8 +52,15 @@ const authAdmin = asyncWrapper(async (req, res, next) => {
   } catch (err) {
     throw new PokemonClientBadRequest(err.message)
   }
-
-  
 });
 
-module.exports = {auth, authAdmin};
+const getUserIdByToken = async (token) => {
+  const existingUser = await pokeUserModel.findOne({token: token})
+  if (!existingUser) {
+    return false
+  } else {
+    return existingUser.id
+  }
+}
+
+module.exports = {auth, authAdmin, getUserIdByToken};

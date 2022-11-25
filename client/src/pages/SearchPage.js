@@ -11,7 +11,6 @@ function App() {
   const [pokemonsShown, setPokemonsShown] = useState([])
   const [page, setPage] = useState(1)
 
-  // const [modalOpen, setModalOpen] = useState(true)
   const [pokemonToModal, setPokeToModal] = useState({})
   const types = ['Grass', 'Poison', 'Fire', 'Flying', 'Water', 'Bug', 'Normal', 'Electric', 'Ground', 'Fairy', 'Fighting', 'Psychic', 'Rock', 'Steel', 'Ice', 'Ghost', 'Dragon', 'Dark']
 

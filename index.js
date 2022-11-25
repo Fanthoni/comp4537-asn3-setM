@@ -12,6 +12,7 @@ const getPokemonModel = require("./schema/pokemon")
 const getPokemons = require("./services/getPokemons");
 const {auth, authAdmin} = require('./utility/auth')
 const asyncWrapper = require("./utility/asycnWrapper")
+const recordAPI = require("./utility/apiRecorder")
 const {PokemonClientBadRequest, PokemonDbError, PokemonNotFoundError, PokemonBadQuery, PokemonUserBadRequest} = require("./error")
 
 const app = express()
@@ -60,8 +61,9 @@ app.get("/api/v1/pokemons/", asyncWrapper(async (req, res, next) => {
         return next(new PokemonNotFoundError("Invalid query! There are 0 pokemons found!"))
       }
       res.status(200).json({data: respond, status: "Success"})
+      next(200)
     })
-}))
+}), recordAPI)
 
 // Get a pokemon data by id
 app.get("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
@@ -75,12 +77,13 @@ app.get("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
       if (pokemon.length !== 1) {
         return next(new PokemonNotFoundError(`Pokemon with id ${id} already exists`))
       }
-      return res.status(200).json({status: "Success", data: pokemon})
+      res.status(200).json({status: "Success", data: pokemon})
+      next(200)
     })
     .catch((err) => {
       return next(new PokemonDbError("Error encountered when creating a pokemon"))
     })
-}))
+}), recordAPI)
 
 app.use(authAdmin)
 
@@ -102,12 +105,13 @@ app.post("/api/v1/pokemon", asyncWrapper(async (req, res, next) => {
 
   await pokemonModel.create(pokemonValues)
     .then((doc) => {
-      return res.status(200).json({status: "Success!", data: doc})
+      res.status(200).json({status: "Success!", data: doc})
+      next(200)
     })
     .catch((err) => {
       return next(new PokemonDbError("Error encountered when creating a pokemon"))
     })
-}))
+}), recordAPI)
 
 // Get pokemon image
 app.get("/api/v1/pokemonImage/:id", asyncWrapper(async (req, res, next) => {
@@ -122,8 +126,9 @@ app.get("/api/v1/pokemonImage/:id", asyncWrapper(async (req, res, next) => {
     }
 
     const baseImageLinkURL = "https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/"
-    return res.status(200).json({status: "Success", imageLink: `${baseImageLinkURL}` +`${getThreeCharDigit(id)}` + `.png`})
-}))
+    res.status(200).json({status: "Success", imageLink: `${baseImageLinkURL}` +`${getThreeCharDigit(id)}` + `.png`})
+    next(200)
+}), recordAPI)
 
 // Delete a pokemon
 app.delete("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
@@ -139,14 +144,14 @@ app.delete("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
 
   await pokemonModel.deleteOne({id: id})
     .then(respond => {
-      console.log('doc', respond)
-      return res.status(200).json({status: "Success", msg: `Pokemon with id ${id} has been successfully deleted`})
+      res.status(200).json({status: "Success", msg: `Pokemon with id ${id} has been successfully deleted`})
+      next(200)
     })
     .catch(err => {
       console.error(`Error found when deleting a pokemon with id ${id}: ${err}`)
       return res.status(500).json({status: "Error", errMsg: "Issue found when deleting pokemon with id " + id})
     })
-}))
+}), recordAPI)
 
 // Upsert a partial pokemon document
 app.patch("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
@@ -160,12 +165,13 @@ app.patch("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
 
   await pokemonModel.updateOne({id: id}, newPokemonValues)
     .then(doc => {
-      return res.status(200).json({status: "Success", data: {newPokemonValues}})
+      res.status(200).json({status: "Success", data: {newPokemonValues}})
+      next(200)
     })
     .catch(err => {
       return next(new PokemonDbError(`Error encountered while updatingPokemon with id ${id}`))
     })
-}))
+}), recordAPI)
 
 // Update the entire pokemon document
 app.put("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
@@ -176,7 +182,8 @@ app.put("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
   if (pokemon.length == 0) {
     await pokemonModel.create(newPokemonValues)
     .then((doc) => {
-      return res.status(200).json({status: "Success!", data: doc})
+      res.status(200).json({status: "Success!", data: doc})
+      next(200)
     })
     .catch((err) => {
       console.log('err', err)
@@ -185,13 +192,14 @@ app.put("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
   } else {
     await pokemonModel.findOneAndUpdate({id: id}, newPokemonValues, {upsert: true})
       .then(doc => {
-        return res.status(200).json({status: "Success", data: newPokemonValues})
+        res.status(200).json({status: "Success", data: newPokemonValues})
+        next(200)
       })
       .catch(err => {
         return next(new PokemonBadQuery("One or more properties may be invalid"))
       })
   }
-}))
+}), recordAPI)
 
 
 
@@ -203,8 +211,10 @@ app.use((err, req, res, next) => {
   }
   const isClientError = err instanceof PokemonClientBadRequest
   const errorStatus = isClientError ? "ClientError" : "ServerError"
+
   res.status(isClientError ? 400 : 500).send({status: errorStatus, error: error.message})
-})
+  next(isClientError ? 400 : 500)
+}, recordAPI)
 
 // Missing route handler
 app.use((req, res) => {
@@ -213,6 +223,3 @@ app.use((req, res) => {
   error: "Not Found"
   })
  })
-
-
-
