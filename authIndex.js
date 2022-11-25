@@ -98,7 +98,7 @@ app.post('/login', asyncWrapper(async (req, res) => {
   }
 
   res.cookie('authToken', token, cookieConfig)
-  res.status(200).json({status: "Success", token})
+  res.status(200).json({status: "Success", token, userType: user.userType})
 }))
 
 
