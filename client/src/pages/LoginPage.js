@@ -29,6 +29,7 @@ function LoginPage({setLogin}) {
                 <input type="password" name="password" onChange={(e) => {setPassword(e.target.value.trim().toLowerCase())}}/>
             </label>
             <button type="button" value="Submit" onClick={onSubmit}>Submit</button>
+            <button type="button" value="Register" onClick={() => {setLogin("register")}}>Register</button>
             {showErr && <p>Something went wrong! Please try again</p>}
         </>
     )

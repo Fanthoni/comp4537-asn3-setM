@@ -2,7 +2,7 @@ import {useEffect, useState} from "react"
 import PokeCard from "../components/PokeCard";
 import PokemonDetail from "../components/PokemonDetail";
 import getAllPokemons from "../api/pokemonAPI";
-import {getCookie} from "../utils/cookie"
+import {getCookie, removeCookie} from "../utils/cookie"
 
 function App() {
 
@@ -10,6 +10,7 @@ function App() {
   const [type, setType] = useState("")
   const [pokemonsShown, setPokemonsShown] = useState([])
   const [page, setPage] = useState(1)
+  const [fullPokemon, setFullPokemon] = useState([])
 
   const [pokemonToModal, setPokeToModal] = useState({})
   const types = ['Grass', 'Poison', 'Fire', 'Flying', 'Water', 'Bug', 'Normal', 'Electric', 'Ground', 'Fairy', 'Fighting', 'Psychic', 'Rock', 'Steel', 'Ice', 'Ghost', 'Dragon', 'Dark']
@@ -35,6 +36,7 @@ function App() {
       try {
         const pokemonRes = await getAllPokemons(809, 0, authToken)
         setPokemonsShown(pokemonRes.data.data)
+        setFullPokemon(pokemonRes.data.data)
       } catch (err) {
         console.error(err)
       }
@@ -45,10 +47,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    let pokemonsToShow = pokemonsShown
+    let pokemonsToShow = fullPokemon
     if (name !== "") {
       pokemonsToShow = pokemonsToShow.filter(poke => poke.name.english.toLowerCase().includes(name))
     }
+
 
     if (type.trim() !== "") {
       pokemonsToShow = pokemonsToShow.filter(poke => type.split(",").every(t => poke.type.includes(t)))
@@ -74,10 +77,17 @@ function App() {
     return buttons;
   }
 
+  const handleLogout = () => {
+    removeCookie("token")
+    removeCookie("userType")
+    window.location.reload()
+}
+
   return (
     <>
       { Object.keys(pokemonToModal).length === 0 ? 
       <div>
+      <button onClick={handleLogout}>Logout</button>
       <h1>Pokedex Search Page</h1>
       <label>
         Pokemon Name:

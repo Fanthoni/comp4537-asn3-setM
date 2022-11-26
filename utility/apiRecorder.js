@@ -3,9 +3,7 @@ const {getUserIdByToken} = require("../utility/auth")
 const mongoose = require("mongoose")
 
 const recordAPI = async (statusCode, req, res, next) => {
-
     if (typeof statusCode !== "number") {
-        console.log(typeof statusCode, "statusCode here 3")
         return next(statusCode)
     }
 
@@ -13,7 +11,8 @@ const recordAPI = async (statusCode, req, res, next) => {
     let apiRecord = {
         endpoint: req._parsedUrl.pathname,
         date: Date.now(),
-        statusCode: statusCode
+        statusCode: statusCode,
+        method: req.method,
     }
 
     if (req.query.authToken) {
@@ -21,7 +20,6 @@ const recordAPI = async (statusCode, req, res, next) => {
         apiRecord["userId"] = userId
     }
 
-    // console.log('apiRecord', apiRecord)
     await apiRecordModel.create(apiRecord)   
 }
 

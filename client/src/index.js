@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
 import SearchPage from "./pages/SearchPage"
 import LoginPage from "./pages/LoginPage"
+import AdminDashboard from './pages/AdminDashboardPage';
+import RegisterPage from "./pages/RegisterPage";
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -24,11 +26,15 @@ function App () {
         isLoggedIn === "User" ? <SearchPage /> : null
       }
       {
-        isLoggedIn === "Admin" ? <h1>Admin Dashboard</h1> : null
+        isLoggedIn === "Admin" ? <AdminDashboard /> : null
+      }
+      {
+        isLoggedIn === "register" ? <RegisterPage setLogin={setLoggedIn} /> : null
       }
       {
         isLoggedIn === undefined ? <LoginPage setLogin={setLoggedIn}/> : null
       }
+
 
     </>
   )

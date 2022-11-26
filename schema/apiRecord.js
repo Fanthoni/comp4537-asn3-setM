@@ -16,6 +16,10 @@ const schema = new mongoose.Schema({
     },
     statusCode: {
         type: Number
+    },
+    method: {
+        type: String,
+        required: true
     }
 })
 

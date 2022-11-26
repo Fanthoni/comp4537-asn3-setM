@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser")
 
 const getThreeCharDigit = require("./utility/utility");
 const pokeUserModel = require("./schema/pokeUser")
+const apiRecordModel = require("./schema/apiRecord")
 const getPokemonModel = require("./schema/pokemon")
 const getPokemons = require("./services/getPokemons");
 const {auth, authAdmin} = require('./utility/auth')
@@ -200,6 +201,13 @@ app.put("/api/v1/pokemon/:id", asyncWrapper(async (req, res, next) => {
       })
   }
 }), recordAPI)
+
+// API Records GET
+app.get("/api/v1/APIrecords/", asyncWrapper(async (req, res, next) => {
+  const apiRecords = await apiRecordModel.find({});
+  // console.log('apiRecords', apiRecords)
+  return res.status(200).json({status: "Success", data: apiRecords})
+}))
 
 
 
